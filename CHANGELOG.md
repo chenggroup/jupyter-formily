@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 0.0.3
+* restore value when open data next time
+
 ## 0.0.2
 * change project name
 
