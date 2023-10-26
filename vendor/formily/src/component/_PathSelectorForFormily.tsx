@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Button, List, Breadcrumb, message, Popover, Input } from "antd";
+import { Button, List, Breadcrumb, message, Popover, Input, Row } from "antd";
 import type { InputProps } from "antd/lib/input";
 import {
   FolderFilled,
   FolderOpenOutlined,
   FileOutlined,
+  CloseOutlined,
 } from "@ant-design/icons";
 import { useModelState } from "@anywidget/react";
 import "./FileSelector.css";
@@ -40,7 +41,7 @@ const PathSelectorForFormily: React.FC<IPathSelectorForFormily> = observer(
   (props) => {
     // console.log({props})
     const value = props?.value;
-    const inputProps = props?.input_props  || {};
+    const inputProps = props?.input_props || {};
     const selectType = props?.select_type || "both";
     const [osSep] = useModelState<string>("os_sep");
     const [msg, setMsg] = useModelState<IMsg>("msg");
@@ -48,6 +49,8 @@ const PathSelectorForFormily: React.FC<IPathSelectorForFormily> = observer(
     const [files] = useModelState<IFile[]>("files");
 
     const divEl = useRef<HTMLDivElement>(null);
+    const fileContentEl = useRef<HTMLDivElement>(null);
+    const inputEl = useRef<any>(null);
     const [popupContainer, setPopupContainer] = useState<HTMLDivElement>();
     const [popupOpen, setPopupOpen] = useState<boolean>(false);
 
@@ -56,6 +59,20 @@ const PathSelectorForFormily: React.FC<IPathSelectorForFormily> = observer(
         setPopupContainer(divEl.current);
       }
     }, [divEl]);
+
+    useEffect(() => {
+      if (inputEl.current) {
+        const el = inputEl.current.input as HTMLInputElement;
+        el.scrollLeft = el.scrollWidth;
+      }
+    }, [value]);
+
+    useEffect(() => {
+      if (fileContentEl.current) {
+        const el = fileContentEl.current;
+        el.scrollTop = 0;
+      }
+    }, [files]);
 
     useEffect(() => {
       if (popupOpen && props.init_path) {
@@ -122,8 +139,8 @@ const PathSelectorForFormily: React.FC<IPathSelectorForFormily> = observer(
       <div
         onClick={(evt) => evt.stopPropagation()}
         style={{ maxHeight: "50ch", overflowY: "auto", width: "100%" }}
+        ref={fileContentEl}
       >
-        {pwdBreadcrumb}
         <List
           className="file-selector-list"
           itemLayout="horizontal"
@@ -190,14 +207,32 @@ const PathSelectorForFormily: React.FC<IPathSelectorForFormily> = observer(
             rootClassName="path-selector-popover"
             getPopupContainer={() => popupContainer}
             content={filesContent}
-            title=""
+            title={
+              <Row justify="space-between" align="top" wrap={false}>
+                {pwdBreadcrumb}
+                <Button
+                  icon={<CloseOutlined size={16} />}
+                  size="small"
+                  shape="circle"
+                  type="text"
+                  onClick={() => {
+                    setPopupOpen(false)
+                  }}
+                />
+              </Row>
+            }
+            open={popupOpen}
             trigger="click"
           >
             <Input
               {...inputProps}
               value={value}
               suffix={<FolderOpenOutlined />}
+              ref={inputEl}
               onChange={(evt) => props.onChange(evt.target.value)}
+              onBlur={(evt) => {
+                evt.target.scrollLeft = evt.target.scrollWidth;
+              }}
             />
           </Popover>
         )}
