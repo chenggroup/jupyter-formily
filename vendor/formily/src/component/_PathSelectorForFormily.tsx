@@ -6,6 +6,7 @@ import {
   FolderOpenOutlined,
   FileOutlined,
   CloseOutlined,
+  CheckOutlined,
 } from "@ant-design/icons";
 import { useModelState } from "@anywidget/react";
 import "./FileSelector.css";
@@ -47,12 +48,14 @@ const PathSelectorForFormily: React.FC<IPathSelectorForFormily> = observer(
     const [msg, setMsg] = useModelState<IMsg>("msg");
     const [pwd, setPwd] = useModelState<string>("pwd");
     const [files] = useModelState<IFile[]>("files");
+    const [loading] = useModelState<boolean>("files_loading");
 
     const divEl = useRef<HTMLDivElement>(null);
     const fileContentEl = useRef<HTMLDivElement>(null);
     const inputEl = useRef<any>(null);
     const [popupContainer, setPopupContainer] = useState<HTMLDivElement>();
     const [popupOpen, setPopupOpen] = useState<boolean>(false);
+    const escEvent = useRef<any>(null);
 
     useEffect(() => {
       if (divEl.current) {
@@ -79,6 +82,21 @@ const PathSelectorForFormily: React.FC<IPathSelectorForFormily> = observer(
         setPwd(props.init_path);
       }
     }, [props.init_path, popupOpen]);
+
+    useEffect(() => {
+      if (popupOpen) {
+        escEvent.current = (evt: KeyboardEvent) => {
+          // console.log(evt)
+          if (evt.key === "Escape") {
+            evt.stopPropagation();
+            setPopupOpen(false);
+          }
+        };
+        window.addEventListener("keydown", escEvent.current, true);
+      } else {
+        window.removeEventListener("keydown", escEvent.current, true);
+      }
+    }, [popupOpen]);
 
     useEffect(() => {
       try {
@@ -123,6 +141,7 @@ const PathSelectorForFormily: React.FC<IPathSelectorForFormily> = observer(
             <Button
               type="link"
               size="small"
+              disabled={loading}
               onClick={() => {
                 const newPwd = pwdSplit.slice(0, ind + 1).join(osSep);
                 setPwd(newPwd.includes(osSep) ? newPwd : `${newPwd}${osSep}`);
@@ -135,10 +154,22 @@ const PathSelectorForFormily: React.FC<IPathSelectorForFormily> = observer(
       />
     );
 
+    const widthProps = {
+      width: popupContainer?.offsetWidth || "100%",
+      maxWidth: "500px",
+      minWidth: "250px",
+    };
+
     const filesContent = (
       <div
         onClick={(evt) => evt.stopPropagation()}
-        style={{ maxHeight: "50ch", overflowY: "auto", width: "100%" }}
+        onScroll={(evt) => evt.stopPropagation()}
+        style={{
+          height: "40%",
+          maxHeight: "300px",
+          overflowY: "auto",
+          ...widthProps,
+        }}
         ref={fileContentEl}
       >
         <List
@@ -146,53 +177,74 @@ const PathSelectorForFormily: React.FC<IPathSelectorForFormily> = observer(
           itemLayout="horizontal"
           style={{ width: "100%" }}
           dataSource={dataSource}
+          loading={loading}
           size="small"
-          renderItem={(item, ind) => (
-            <List.Item
-              className={
-                joinPath(pwd, item.name) === value ? "file-selected" : ""
-              }
-              onClick={() => {
-                if (ind === 0 && item.name === "..") {
-                  return;
+          renderItem={(item, ind) => {
+            const isFirstBack = ind === 0 && item.name === "..";
+            const hideSelectBtn =
+              isFirstBack || (selectType === "file" && item.isDir);
+            return (
+              <List.Item
+                className={
+                  joinPath(pwd, item.name) === value ? "file-selected" : ""
                 }
-                if (selectType !== "file") {
-                  props.onChange(joinPath(pwd, item.name));
-                } else {
-                  !item.isDir && props.onChange(joinPath(pwd, item.name));
+                style={item.isDir ? { cursor: "pointer" } : {}}
+                actions={
+                  hideSelectBtn
+                    ? []
+                    : [
+                        <Button
+                          icon={<CheckOutlined size={16} />}
+                          rootClassName="file-selector-select-btn"
+                          size="small"
+                          shape="circle"
+                          type="text"
+                          onClick={(evt) => {
+                            evt.stopPropagation();
+                            props.onChange(joinPath(pwd, item.name));
+                            setPopupOpen(false);
+                          }}
+                        />,
+                      ]
                 }
-              }}
-              onDoubleClick={() => {
-                if (ind === 0 && item.name === "..") {
-                  const newPwd = pwdSplit
-                    .slice(0, pwdSplit.length - 1)
-                    .join(osSep);
-                  setPwd(newPwd.includes(osSep) ? newPwd : `${newPwd}${osSep}`);
-                  return;
-                }
-                if (item.isDir) {
-                  setPwd(joinPath(pwd, item.name));
-                } else {
-                  props.onChange(joinPath(pwd, item.name));
-                }
-              }}
-            >
-              <List.Item.Meta
-                avatar={
-                  item.isDir ? (
-                    item.name === ".." && ind === 0 ? (
-                      <FolderOpenOutlined />
+                onClick={() => {
+                  if (isFirstBack) {
+                    const newPwd = pwdSplit
+                      .slice(0, pwdSplit.length - 1)
+                      .join(osSep);
+                    setPwd(
+                      newPwd.includes(osSep) ? newPwd : `${newPwd}${osSep}`
+                    );
+                    return;
+                  }
+                  if (item.isDir) {
+                    setPwd(joinPath(pwd, item.name));
+                  }
+                }}
+              >
+                <List.Item.Meta
+                  avatar={
+                    item.isDir ? (
+                      item.name === ".." && ind === 0 ? (
+                        <FolderOpenOutlined />
+                      ) : (
+                        <FolderFilled />
+                      )
                     ) : (
-                      <FolderFilled />
+                      <FileOutlined />
                     )
-                  ) : (
-                    <FileOutlined />
-                  )
-                }
-                title={item.name}
-              />
-            </List.Item>
-          )}
+                  }
+                  title={
+                    <div
+                      style={{ fontWeight: "normal", wordBreak: "break-all" }}
+                    >
+                      {item.name}
+                    </div>
+                  }
+                />
+              </List.Item>
+            );
+          }}
         />
       </div>
     );
@@ -201,14 +253,23 @@ const PathSelectorForFormily: React.FC<IPathSelectorForFormily> = observer(
       <div ref={divEl}>
         {popupContainer && (
           <Popover
-            onOpenChange={(open) => setPopupOpen(open)}
+            onOpenChange={(open) => {
+              setPopupOpen(open);
+            }}
             destroyTooltipOnHide
             placement="bottom"
             rootClassName="path-selector-popover"
-            getPopupContainer={() => popupContainer}
+            getPopupContainer={() =>
+              document.querySelector(".formily-modal-root") || document.body
+            }
             content={filesContent}
             title={
-              <Row justify="space-between" align="top" wrap={false}>
+              <Row
+                justify="space-between"
+                align="top"
+                wrap={false}
+                style={widthProps}
+              >
                 {pwdBreadcrumb}
                 <Button
                   icon={<CloseOutlined size={16} />}
@@ -216,7 +277,7 @@ const PathSelectorForFormily: React.FC<IPathSelectorForFormily> = observer(
                   shape="circle"
                   type="text"
                   onClick={() => {
-                    setPopupOpen(false)
+                    setPopupOpen(false);
                   }}
                 />
               </Row>
@@ -227,7 +288,9 @@ const PathSelectorForFormily: React.FC<IPathSelectorForFormily> = observer(
             <Input
               {...inputProps}
               value={value}
-              suffix={<FolderOpenOutlined />}
+              suffix={
+                <FolderOpenOutlined onClick={() => setPopupOpen(!popupOpen)} />
+              }
               ref={inputEl}
               onChange={(evt) => props.onChange(evt.target.value)}
               onBlur={(evt) => {
