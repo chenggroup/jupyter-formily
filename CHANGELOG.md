@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 0.0.4
+* general bugs fix and improvements of FilePicker
+
 ## 0.0.3
 * restore value when open data next time
 
