@@ -1,6 +1,9 @@
 # jupyter-formily
 
 Use [formily](https://github.com/alibaba/formily) in Jupyter.
+
+<img src="assets/jupyter-formily-demo.png" height="500" style="border-radius: 6px">
+
 ## Installation
 
 ```bash
