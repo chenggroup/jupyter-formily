@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.0.5
+* fix: lock version of `anywidget`
+* improvement: fixed height of form 
+
 ## 0.0.4
 * general bugs fix and improvements of FilePicker
 
