@@ -78,6 +78,16 @@ const PathSelectorForFormily: React.FC<IPathSelectorForFormily> = observer(
     }, [files]);
 
     useEffect(() => {
+      if (popupOpen && value) {
+        const valueSplit = value.split(osSep);
+        const newPwd = valueSplit
+          .slice(0, valueSplit.length - 1)
+          .join(osSep);
+        setPwd(
+          newPwd.includes(osSep) ? newPwd : `${newPwd}${osSep}`
+        );
+        return;
+      }
       if (popupOpen && props.init_path) {
         setPwd(props.init_path);
       }
@@ -124,6 +134,15 @@ const PathSelectorForFormily: React.FC<IPathSelectorForFormily> = observer(
       pwdSplit.length > 1 && pwdSplit[1] !== ""
         ? [{ name: "..", isDir: true }]
         : [];
+    
+    const handleParentFolder = (ind = pwdSplit.length - 1) => {
+      const newPwd = pwdSplit
+        .slice(0, ind)
+        .join(osSep);
+      setPwd(
+        newPwd.includes(osSep) ? newPwd : `${newPwd}${osSep}`
+      );
+    }
 
     const dataSource = [
       ...firstDirBack,
@@ -143,8 +162,7 @@ const PathSelectorForFormily: React.FC<IPathSelectorForFormily> = observer(
               size="small"
               disabled={loading}
               onClick={() => {
-                const newPwd = pwdSplit.slice(0, ind + 1).join(osSep);
-                setPwd(newPwd.includes(osSep) ? newPwd : `${newPwd}${osSep}`);
+                handleParentFolder(ind + 1);
               }}
             >
               {item || osSep}
@@ -165,7 +183,7 @@ const PathSelectorForFormily: React.FC<IPathSelectorForFormily> = observer(
         onClick={(evt) => evt.stopPropagation()}
         onScroll={(evt) => evt.stopPropagation()}
         style={{
-          height: "40%",
+          height: "300px",
           maxHeight: "300px",
           overflowY: "auto",
           ...widthProps,
@@ -209,12 +227,7 @@ const PathSelectorForFormily: React.FC<IPathSelectorForFormily> = observer(
                 }
                 onClick={() => {
                   if (isFirstBack) {
-                    const newPwd = pwdSplit
-                      .slice(0, pwdSplit.length - 1)
-                      .join(osSep);
-                    setPwd(
-                      newPwd.includes(osSep) ? newPwd : `${newPwd}${osSep}`
-                    );
+                    handleParentFolder()
                     return;
                   }
                   if (item.isDir) {

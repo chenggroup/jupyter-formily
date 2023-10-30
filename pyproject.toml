@@ -9,7 +9,7 @@ include = ["vendor/formily/dist/*.js", "vendor/formily/dist/*.css"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-anywidget = {extras = ["dev"], version = "^0.7.0"}
+anywidget = {extras = ["dev"], version = "0.7.0"}
 
 
 [[tool.poetry.source]]
