@@ -30,7 +30,7 @@ import {
 } from "@formily/antd-v5";
 import { createForm } from "@formily/core";
 import { createSchemaField, ISchema } from "@formily/react";
-import { Card, Slider, Rate, Modal, Button, Divider, Popconfirm } from "antd";
+import { Card, Slider, Rate, Modal, Button, Divider } from "antd";
 import React, { useEffect } from "react";
 import PathSelectorForFormily from "./_PathSelectorForFormily";
 
@@ -173,16 +173,7 @@ const Formily: React.FC = () => {
             <Button type="primary" {...ok_props} onClick={handleOK}>
               {ok_label}
             </Button>
-            <Popconfirm
-              title="Exit modal form"
-              description="The changed data would not be update. Are you sure to exit?"
-              onConfirm={handleCancel}
-              // onCancel={}
-              okText="Yes"
-              cancelText="No"
-            >
-              <Button {...cancel_props}>{cancel_label}</Button>
-            </Popconfirm>
+            <Button {...cancel_props} onClick={handleCancel}>{cancel_label}</Button>
           </Space>
         </>
       }

@@ -60,6 +60,7 @@ class Formily(anywidget.AnyWidget):
     
     # variable for custom file selector
     os_sep= traitlets.Unicode(os.sep).tag(sync=True)
+    event_content = traitlets.Dict({"event": "", "argv": {}}).tag(sync=True)
     pwd = traitlets.Unicode("").tag(sync=True)
     files = traitlets.List([]).tag(sync=True)
     msg = traitlets.Dict({"content": ""}).tag(sync=True) # use for error msg action
@@ -68,13 +69,38 @@ class Formily(anywidget.AnyWidget):
 
     def __init__(self, schema = default_schema, options = None, default_value = None):
         super(Formily, self).__init__()
-        self.value = default_value or {}
+        self.value = default_value and {"data": default_value} or {}
         self.schema = schema
         self.options = {**self.options, **(options or {})}
 
         self.pwd = os.getcwd()
         self._get_files()
+        self.observe(self._on_event, names='event_content')
         self.observe(self._get_files, names='pwd')
+
+    def _on_event(self, change = ""):
+        event = self.event_content.get("event")
+        argv = self.event_content.get("argv")
+
+        if event == "init_pwd":
+            value = argv.get("value")
+            init_path = argv.get("init_path")
+            if value and os.path.exists(value):
+                self.pwd = os.path.abspath(os.path.dirname(value))
+            elif init_path and os.path.exists(init_path):
+                self.pwd = os.path.abspath(init_path)
+            else:
+                self.pwd = os.getcwd()
+        elif event == "parent_pwd":
+            value = argv.get("value")
+            level = argv.get("level")
+            for i in range(0, level):
+                value = os.path.dirname(value)
+            self.pwd = value
+        elif event == "child_pwd":
+            value = argv.get("value")
+            dirname = argv.get("dirname")
+            self.pwd = os.path.join(value, dirname)
     
     def _get_files(self, change = ""):
         path = self.pwd
@@ -91,7 +117,8 @@ class Formily(anywidget.AnyWidget):
             self.pwd = os.getcwd()
             return
         files = [{"name": file, "isDir":  os.path.isdir(os.path.join(path, file))} for file in files]
-        files.sort(key=lambda item: item["isDir"], reverse=True)
+        files.sort(key=lambda item: item["name"])
+        files.sort(key=lambda item: not item["isDir"])
         self.files = files
         self.files_loading = False
 

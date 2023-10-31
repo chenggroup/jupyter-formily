@@ -15,19 +15,20 @@ pip install jupyter-formily
 ```python
 from jupyter_formily import Formily
 
-example = Formily(schema, options)
-display(example)
+example = Formily(schema, options, default_value)
+example.display()
 ```
 
 `schema` can be constructed with [Formily Designer](https://designable-antd.formilyjs.org/) or crafted manually. 
 `options` allows you to tune the form to fit you need.
+`default_value` allows you to set initial value which follow schema.
 
 `options` is dict, and key as follow:
 
 | key          | Type                                                                                                                    | Default value |
 | ------------ | ----------------------------------------------------------------------------------------------------------------------- | ------------- |
 | show_modal   | bool                                                                                                                    | True          |
-| ok_label     | string                                                                                                                  | "Update"      |
+| ok_label     | string                                                                                                                  | "OK"      |
 | cancel_label | string                                                                                                                  | "Cancel"      |
 | ok_props     | [ISubmitProps](https://ant-design.antgroup.com/components/button#api)                                                   | {}            |
 | cancel_props | [ButtonProps](https://ant-design.antgroup.com/components/button#api)                                                    | {}            |
