@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.0.6
+* feat: file picker support select multiple files
+* feat: send toast message
+
 ## 0.0.5
 * fix: lock version of `anywidget`
 * improvement: fixed height of form 
