@@ -67,7 +67,7 @@ class Formily(anywidget.AnyWidget):
     online = traitlets.Bool(False).tag(sync=True)
     files_loading = traitlets.Bool(False).tag(sync=True)
 
-    def __init__(self, schema = default_schema, options = None, default_value = None):
+    def __init__(self, schema = default_schema, options = None, default_value = None, on_change = lambda x: x):
         super(Formily, self).__init__()
         self.value = default_value and {"data": default_value} or {}
         self.schema = schema
@@ -77,6 +77,7 @@ class Formily(anywidget.AnyWidget):
         self._get_files()
         self.observe(self._on_event, names='event_content')
         self.observe(self._get_files, names='pwd')
+        self.observe(on_change, names='value')
 
     def _on_event(self, change = ""):
         event = self.event_content.get("event")

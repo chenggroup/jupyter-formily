@@ -170,7 +170,7 @@ const Formily: React.FC = () => {
         <>
           <Divider />
           <Space>
-            <Button type="primary" {...ok_props} onClick={handleOK}>
+            <Button type="primary" {...ok_props} onClick={() => form.submit(handleOK)}>
               {ok_label}
             </Button>
             <Button {...cancel_props} onClick={handleCancel}>{cancel_label}</Button>
