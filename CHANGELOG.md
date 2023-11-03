@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 0.0.7
+* fix: validator doesn't work
+
 ## 0.0.6
 * feat: file picker support select multiple files
 * feat: send toast message
