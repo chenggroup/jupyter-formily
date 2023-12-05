@@ -104,9 +104,9 @@ const defaultModalProps: ModalProps = {
   maskClosable: false,
   centered: true,
   closeIcon: null,
-  width: "60vw",
-  style: { maxWidth: "700px" },
-  styles: { body: { maxHeight: "70vh", overflowY: "auto" } },
+  // width: "60vw",
+  style: { maxWidth: "70vh", minWidth: "500px" },
+  styles: { body: { maxHeight: "70vh", overflowY: "auto" }, header: {marginBottom: "24px"} },
 };
 
 const Formily: React.FC = () => {
@@ -168,7 +168,7 @@ const Formily: React.FC = () => {
       open={online}
       footer={
         <>
-          <Divider />
+          <Divider style={{marginTop: "0", marginBottom: "16px"}} />
           <Space>
             <Button type="primary" {...ok_props} onClick={() => form.submit(handleOK)}>
               {ok_label}
